@@ -1,0 +1,3 @@
+include ':Adeona Ad Inject Android SDK'
+include ':app'
+rootProject.name = "Adeona Ad Inject"
