@@ -1,6 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 30
@@ -20,7 +21,21 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "API_BASE_URL", '\"http://smartmessenger.lk:7000/\"'
         }
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "API_BASE_URL", '\"http://smartmessenger.lk:7000/\"'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
 }
 
@@ -29,8 +44,43 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.3.1'
     implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
+
+    def lifecycle_version = "2.2.0"
+    def retrofitVersion = "2.6.2"
+    def okhttpVersion = "4.2.1"
+
+    // Library support for ViewModel
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    // Library support for LiveData
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
+   // Library support for Saved state module for ViewModel
+    implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycle_version"
+   // Library support for annotation processor
+    kapt "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
+    //Library support for Kotlin coroutines with multiplatform support
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9'
+
+    //Library support for okhttp3
+    implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
+    //Library support for okhttp3 interceptor
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
+
+    //Library support for retrofit
+    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    //Library support for retrofit gson
+    implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    //Library support for retrofit Adapter Factory
+    implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion"
+
+    //Library support for glide
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
+    // Library support for glide annotation processor
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
+
+    implementation 'com.squareup.picasso:picasso:2.71828'
 }
