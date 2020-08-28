@@ -4,17 +4,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+
     tools:context=".MainActivity">
 
 
-    <com.adeona.adeonaadinjectandroidsdk.addspace.Banner
+   <com.adeona.adeonaadinjectandroidsdk.addspace.Banner
         android:layout_width="match_parent"
         android:layout_height="70dp"
+         app:addtext ="sdsds"
         app:layout_constraintBottom_toBottomOf="parent">
 
     </com.adeona.adeonaadinjectandroidsdk.addspace.Banner>
 
+<!--    <com.adeona.adeonaadinjectandroidsdk.addspace.Interstitial
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        app:addtext="progress"
+        app:guide_progressTextColor="#ffffff"
+        app:layout_constraintBottom_toBottomOf="parent">
 
+    </com.adeona.adeonaadinjectandroidsdk.addspace.Interstitial>-->
 
 
     <androidx.appcompat.widget.AppCompatButton

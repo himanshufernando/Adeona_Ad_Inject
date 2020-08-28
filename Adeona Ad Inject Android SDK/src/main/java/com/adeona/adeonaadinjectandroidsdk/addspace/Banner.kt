@@ -3,24 +3,22 @@ package com.adeona.adeonaadinjectandroidsdk.addspace
 
 import android.app.Activity
 import android.content.Context
-import android.content.res.TypedArray
+import android.content.Intent
+import android.net.Uri
 import android.util.AttributeSet
 import android.view.View
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.ProgressBar
-import androidx.lifecycle.MutableLiveData
+import android.widget.*
 import com.adeona.adeonaadinjectandroidsdk.R
 import com.adeona.adeonaadinjectandroidsdk.data.model.AdSpace
 import com.adeona.adeonaadinjectandroidsdk.data.model.AdSpaceRespond
 import com.adeona.adeonaadinjectandroidsdk.repo.AdSpaceRepo
 import com.adeona.adeonaadinjectandroidsdk.services.network.api.APIInterface
 import com.bumptech.glide.Glide
-import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.layout_banner.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class Banner @JvmOverloads constructor(
@@ -29,15 +27,10 @@ class Banner @JvmOverloads constructor(
 ) : LinearLayout(context, attrs, defStyleAttr) {
 
 
-     var att  = attrs
-
-    // private  var mActivity = activity
     private var mContext = context
-    var activity = context as Activity
+
     private val scope = CoroutineScope(Dispatchers.IO)
-
     private var adSpaceRepo: AdSpaceRepo = AdSpaceRepo(APIInterface.create(), mContext)
-
     private var _adSpaceId = ""
     private var _adSpaceType = ""
     private var _appId = ""
@@ -45,79 +38,19 @@ class Banner @JvmOverloads constructor(
     private var _subCategory = ""
     private var _vendor = ""
 
-
-    private var xxxx = ""
-
-    // layout variables
-    lateinit var progressBar: ProgressBar
-    lateinit var imageViewBanner: ImageView
-    lateinit var linearLayoutMain: LinearLayout
-    lateinit var imageViewClose: ImageView
-
-
-
-
+    private  var mActivity = context as Activity
 
     init {
         inflate(context, R.layout.layout_banner, this)
+        var  attributes = context.obtainStyledAttributes(attrs, R.styleable.BannerView)
+        ll_banner_main.visibility = View.GONE
 
-        imageViewClose = findViewById(R.id.img_adspace_banner_close)
-        linearLayoutMain = findViewById(R.id.ll_banner_main)
-        imageViewBanner = findViewById(R.id.img_adspace_banner)
-        progressBar = findViewById(R.id.progressBar)
-        att = attrs
-        initView(att)
-    }
-
-
-    private fun initView(attrs: AttributeSet?) {
-        attrs ?: return
-
-        val attributeValues = context.obtainStyledAttributes(attrs, R.styleable.BannerView)
-        with(attributeValues) {
-
-            recycle()
+        img_adspace_banner_close.setOnClickListener {
+            ll_banner_main.visibility = View.GONE
         }
+        attributes.recycle()
+
     }
-
-
-
-/*
-    init {
-
-
-
-        inflate(context, R.layout.layout_banner, this)
-
-
-        // initialize layout variables
-        imageViewClose = findViewById(R.id.img_adspace_banner_close)
-        linearLayoutMain = findViewById(R.id.ll_banner_main)
-        imageViewBanner = findViewById(R.id.img_adspace_banner)
-        progressBar = findViewById(R.id.progressBar)
-
-        attributes = context.obtainStyledAttributes(attrs, R.styleable.BannerView)
-
-
-
-
-        progressBar.visibility = View.GONE
-
-
-
-        // cloase image onclick
-        imageViewClose.setOnClickListener {
-            linearLayoutMain.visibility = View.GONE
-
-        }
-
-
-         attributes.recycle()
-    }
-*/
-
-
-
 
     fun set(key: String, value: String) {
         when (key) {
@@ -140,61 +73,51 @@ class Banner @JvmOverloads constructor(
             subCategory = _subCategory
             vendor = _vendor
         }
-       callAdspace(adSpace)
+        callAdspace(adSpace)
 
     }
 
     private fun callAdspace(adSpace: AdSpace) = scope.launch {
         try {
-          // var respons = adSpaceRepo.getAdSpace(adSpace)
-          //  setAdSpaceData(respons)
-          //  println("aaaaaaaaaaaaaaaaaaaaa respons : " + respons)
-
-            val movies: AdSpaceRespond = async(Dispatchers.Main) {
-                adSpaceRepo.getAdSpace(adSpace)
-            }.await()
-
-           setAdSpaceData(movies)
-
+            val adSpaceRespond: AdSpaceRespond = withContext(Dispatchers.Main) {
+                adSpaceRepo.getAdSpace(adSpace,"banner")
+            }
+            setAdSpaceData(adSpaceRespond)
         } catch (ex: Exception) {
-            println("aaaaaaaaaaaaaaaaaaaaa Exception: " + ex)
+            Toast.makeText(mContext, ex.message, Toast.LENGTH_LONG).show()
         }
 
     }
-    private fun setAdSpaceData(adSpaceRespond: AdSpaceRespond){
 
-        println("aaaaaaaaaaaaaaaaaaaaa adSpaceRespond: " + adSpaceRespond)
+    private fun setAdSpaceData(adSpaceRespond: AdSpaceRespond) {
+        var imgAdspaceBanner= mActivity.findViewById<ImageView>(R.id.img_adspace_banner)
+        var progressBarBannerLoading= mActivity.findViewById<ProgressBar>(R.id.progressBar_banner_loading)
+        var llBannerMain= mActivity.findViewById<LinearLayout>(R.id.ll_banner_main)
+        mActivity?.runOnUiThread {
+            progressBarBannerLoading.visibility = View.GONE
+            if (adSpaceRespond.status == "failed") {
+                Toast.makeText(mContext, adSpaceRespond.comment, Toast.LENGTH_SHORT).show()
+            } else {
+                llBannerMain.visibility = View.VISIBLE
+                imgAdspaceBanner.visibility = View.VISIBLE
+                Glide.with(mContext)
+                    .load(adSpaceRespond.resourceUrl)
+                    .into(imgAdspaceBanner)
+                if(adSpaceRespond.actionData.imageClick){
+                    imgAdspaceBanner.setOnClickListener {
+                        val url = adSpaceRespond.actionData.imageClickUrl
+                        val i = Intent(Intent.ACTION_VIEW)
+                        i.data = Uri.parse(url)
+                        mActivity.startActivity(i)
+                    }
+                }else{
+
+                }
 
 
-        activity?.runOnUiThread(java.lang.Runnable {
-            Glide.with(mContext)
-                .load("https://smartmessenger.lk/Uploads/iap/banner_1.jpg")
-                .centerCrop()
-                .into(imageViewBanner)
-        })
+            }
 
+        }
 
-
-        initView(att)
-/*
-        xxxx = adSpaceRespond.resourceUrl
-
-
-        Glide.with(mContext)
-            .load(xxxx)
-            .centerCrop()
-            .into(imageViewBanner)
-
-        attributes.recycle()*/
-
-
-     /*   Glide.with(mContext)
-            .load("https://smartmessenger.lk/Uploads/iap/banner_1.jpg")
-            .centerCrop()
-            .into(imageViewBanner)*/
-
-      //  imageViewBanner.setImageResource(R.drawable.ic_add_play)
-
-      //  attributes.recycle()
     }
 }

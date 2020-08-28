@@ -4,8 +4,6 @@ import android.content.Context
 import android.content.pm.PackageInfo
 import android.os.Build
 import android.provider.Settings
-import com.adeona.adeonaadinjectandroidsdk.R
-import com.adeona.adeonaadinjectandroidsdk.data.model.AdSpaceError
 
 import java.util.*
 
@@ -15,13 +13,6 @@ object AppPrefs {
     enum class adSpaceType {
         banner, popUp, native, video, interstitial
     }
-
-    //Error Code
-     const val ERROR_INTERNET = 404
-     const val ERROR_EMPTY_SPACE_ID = 100
-     const val ERROR_EMPTY_APP_ID = 101
-     const val ERROR_EMPTY_SPACE_TYPE = 102
-
 
 
     // function to get device Id
@@ -71,8 +62,5 @@ object AppPrefs {
         return packageInfo.versionName
     }
 
-    //pre defined error object
-    fun errorNoInternet(context: Context) : AdSpaceError {
-        return AdSpaceError(true, ERROR_INTERNET, context.getString(R.string.no_internet))
-    }
+
 }

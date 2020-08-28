@@ -5,10 +5,11 @@ data class AdSpaceRespond(
     var comment: String,
     var resourceUrl: String,
     var status: String,
-    var transactionId: String,
-    var adSpaceError: AdSpaceError
+    var transactionId: String
 
 
 ){
-    constructor() : this(ActionData(),"","","","",AdSpaceError())
+    constructor() : this(ActionData(),"","","","")
+
+
 }

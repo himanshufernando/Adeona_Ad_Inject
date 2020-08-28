@@ -1,9 +1,11 @@
 <resources>
-    <string name="no_internet">No internet access please check your connection and retry!</string>
+    <string name="no_internet">No internet access !</string>
 
-    <string name="error_empty_appid">App id required, Please add App id !!</string>
-    <string name="error_empty_spaceid">Space id required, Please add Space id !!</string>
-    <string name="error_empty_spacetype">Space Type id required, Please add Space type !!</string>
+    <string name="error_empty_appid">App id required, Please add app id !!</string>
+    <string name="error_empty_spaceid">Space id required, Please add space id !!</string>
+    <string name="error_empty_spacetype">Space Type id required, Please add space type !!</string>
+    <string name="error_incorrect_space_type">Incorrect_space_type, Please add correct space type !!</string>
+
 
     <string name="os">Android</string>
 </resources>

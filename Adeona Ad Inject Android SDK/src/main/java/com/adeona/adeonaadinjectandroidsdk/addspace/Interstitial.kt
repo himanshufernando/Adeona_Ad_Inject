@@ -4,31 +4,35 @@ import android.app.Activity
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
+import android.os.Build
+import android.util.AttributeSet
 import android.view.View
-import android.view.Window
+import android.view.WindowManager
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.adeona.adeonaadinjectandroidsdk.R
 import com.adeona.adeonaadinjectandroidsdk.data.model.AdSpace
 import com.adeona.adeonaadinjectandroidsdk.data.model.AdSpaceRespond
 import com.adeona.adeonaadinjectandroidsdk.repo.AdSpaceRepo
 import com.adeona.adeonaadinjectandroidsdk.services.network.api.APIInterface
 import com.bumptech.glide.Glide
-
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-class PopUp @JvmOverloads constructor(context: Context) : Dialog(context) {
+class Interstitial  @JvmOverloads constructor(context: Context) : Dialog(context) {
 
-    private var mContext = context
+    var mContext = context
     var mActivity = context as Activity
+    
     private val scope = CoroutineScope(Dispatchers.IO)
-
     private var adSpaceRepo: AdSpaceRepo = AdSpaceRepo(APIInterface.create(), mContext)
 
     private var _adSpaceId = ""
@@ -38,26 +42,21 @@ class PopUp @JvmOverloads constructor(context: Context) : Dialog(context) {
     private var _subCategory = ""
     private var _vendor = ""
 
-     var popUpAdd: Dialog
+
+    var InterstitialDialog: Dialog
+
     var imgAdspaceBanner : ImageView
-     var progressBarBannerLoading : ProgressBar
+    var progressBarBannerLoading : ProgressBar
     var imgAdspaceBannerClose : ImageView
+    init {
 
-   init {
+        InterstitialDialog= Dialog(mContext, R.style.AppTheme)
+        InterstitialDialog.setContentView(R.layout.layout_interstitial)
 
-       popUpAdd = Dialog(mContext)
-       popUpAdd.requestWindowFeature(Window.FEATURE_NO_TITLE)
-       popUpAdd.window!!.setBackgroundDrawableResource(android.R.color.transparent)
-       popUpAdd.setContentView(R.layout.layout_popup)
-       popUpAdd.setCancelable(false)
-
-       imgAdspaceBannerClose= popUpAdd.findViewById<ImageView>(R.id.img_adspace_banner)
-       imgAdspaceBanner= popUpAdd.findViewById<ImageView>(R.id.img_adspace_banner)
-       progressBarBannerLoading= popUpAdd.findViewById<ProgressBar>(R.id.progressBar_banner_loading)
-
-   }
-
-
+        imgAdspaceBannerClose= InterstitialDialog.findViewById<ImageView>(R.id.img_adspace_inter_close)
+        imgAdspaceBanner= InterstitialDialog.findViewById<ImageView>(R.id.img_adspace_inter)
+        progressBarBannerLoading= InterstitialDialog.findViewById<ProgressBar>(R.id.progressBar_inter_loading)
+    }
 
     fun set(key: String, value: String) {
         when (key) {
@@ -87,7 +86,7 @@ class PopUp @JvmOverloads constructor(context: Context) : Dialog(context) {
     private fun callAdspace(adSpace: AdSpace) = scope.launch {
         try {
             val adSpaceRespond: AdSpaceRespond = withContext(Dispatchers.Main) {
-                adSpaceRepo.getAdSpace(adSpace, "popUp")
+                adSpaceRepo.getAdSpace(adSpace, "interstitial")
             }
             setAdSpaceData(adSpaceRespond)
         } catch (ex: Exception) {
@@ -97,6 +96,7 @@ class PopUp @JvmOverloads constructor(context: Context) : Dialog(context) {
     }
 
     private fun setAdSpaceData(adSpaceRespond: AdSpaceRespond) {
+
         mActivity?.runOnUiThread {
             progressBarBannerLoading.visibility = View.GONE
             if (adSpaceRespond.status == "failed") {
@@ -105,7 +105,6 @@ class PopUp @JvmOverloads constructor(context: Context) : Dialog(context) {
 
                 Glide.with(mContext)
                     .load(adSpaceRespond.resourceUrl)
-                    .fitCenter()
                     .into(imgAdspaceBanner)
                 if(adSpaceRespond.actionData.imageClick){
                     imgAdspaceBanner.setOnClickListener {
@@ -119,15 +118,40 @@ class PopUp @JvmOverloads constructor(context: Context) : Dialog(context) {
 
 
                 imgAdspaceBannerClose.setOnClickListener {
-                    popUpAdd.dismiss()
+                    InterstitialDialog.dismiss()
                 }
 
-                popUpAdd.show()
+                InterstitialDialog.show()
             }
 
         }
 
+    }
 
+
+    private fun trasperat(activity: Activity) {
+        if (Build.VERSION.SDK_INT in 19..20) {
+            setWindowFlag(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, true)
+        }
+        if (Build.VERSION.SDK_INT >= 19) {
+            activity.window.decorView.systemUiVisibility =
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+        }
+        if (Build.VERSION.SDK_INT >= 21) {
+            setWindowFlag(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, false)
+            activity.window.statusBarColor = Color.BLACK
+        }
+    }
+
+    private fun setWindowFlag(bits: Int, on: Boolean) {
+        val win =mActivity.window
+        val winParams = win.attributes
+        if (on) {
+            winParams.flags = winParams.flags or bits
+        } else {
+            winParams.flags = winParams.flags and bits.inv()
+        }
+        win.attributes = winParams
     }
 
 }

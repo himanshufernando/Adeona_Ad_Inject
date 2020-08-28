@@ -5,25 +5,25 @@ import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.DisplayMetrics
 import android.view.View
 import android.view.Window
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.Toast
+import android.widget.VideoView
 import com.adeona.adeonaadinjectandroidsdk.R
 import com.adeona.adeonaadinjectandroidsdk.data.model.AdSpace
 import com.adeona.adeonaadinjectandroidsdk.data.model.AdSpaceRespond
 import com.adeona.adeonaadinjectandroidsdk.repo.AdSpaceRepo
 import com.adeona.adeonaadinjectandroidsdk.services.network.api.APIInterface
-import com.bumptech.glide.Glide
-
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-class PopUp @JvmOverloads constructor(context: Context) : Dialog(context) {
+class Video @JvmOverloads constructor(context: Context) : Dialog(context) {
 
     private var mContext = context
     var mActivity = context as Activity
@@ -38,23 +38,25 @@ class PopUp @JvmOverloads constructor(context: Context) : Dialog(context) {
     private var _subCategory = ""
     private var _vendor = ""
 
-     var popUpAdd: Dialog
-    var imgAdspaceBanner : ImageView
-     var progressBarBannerLoading : ProgressBar
-    var imgAdspaceBannerClose : ImageView
+     var videoAdd: Dialog
 
+    var imgAdspaceBannerClose : ImageView
+    var vidAdspaceBanner : VideoView
+    var progressBarBannerLoading : ProgressBar
+    var imgAdspaceVideoPlay : ImageView
    init {
 
-       popUpAdd = Dialog(mContext)
-       popUpAdd.requestWindowFeature(Window.FEATURE_NO_TITLE)
-       popUpAdd.window!!.setBackgroundDrawableResource(android.R.color.transparent)
-       popUpAdd.setContentView(R.layout.layout_popup)
-       popUpAdd.setCancelable(false)
+       videoAdd = Dialog(mContext)
+       videoAdd.requestWindowFeature(Window.FEATURE_NO_TITLE)
+       videoAdd.window!!.setBackgroundDrawableResource(android.R.color.transparent)
+       videoAdd.setContentView(R.layout.layout_video)
+       videoAdd.setCancelable(false)
 
-       imgAdspaceBannerClose= popUpAdd.findViewById<ImageView>(R.id.img_adspace_banner)
-       imgAdspaceBanner= popUpAdd.findViewById<ImageView>(R.id.img_adspace_banner)
-       progressBarBannerLoading= popUpAdd.findViewById<ProgressBar>(R.id.progressBar_banner_loading)
+       imgAdspaceBannerClose= videoAdd.findViewById<ImageView>(R.id.img_adspace_video_close)
+       vidAdspaceBanner =  videoAdd.findViewById<VideoView>(R.id.vid_adspace_banner)
+       progressBarBannerLoading= videoAdd.findViewById<ProgressBar>(R.id.progressBar_banner_loading)
 
+       imgAdspaceVideoPlay=  videoAdd.findViewById<ImageView>(R.id.img_adspace_video_play)
    }
 
 
@@ -87,7 +89,7 @@ class PopUp @JvmOverloads constructor(context: Context) : Dialog(context) {
     private fun callAdspace(adSpace: AdSpace) = scope.launch {
         try {
             val adSpaceRespond: AdSpaceRespond = withContext(Dispatchers.Main) {
-                adSpaceRepo.getAdSpace(adSpace, "popUp")
+                adSpaceRepo.getAdSpace(adSpace, "video")
             }
             setAdSpaceData(adSpaceRespond)
         } catch (ex: Exception) {
@@ -98,17 +100,32 @@ class PopUp @JvmOverloads constructor(context: Context) : Dialog(context) {
 
     private fun setAdSpaceData(adSpaceRespond: AdSpaceRespond) {
         mActivity?.runOnUiThread {
-            progressBarBannerLoading.visibility = View.GONE
             if (adSpaceRespond.status == "failed") {
                 Toast.makeText(mContext, adSpaceRespond.comment, Toast.LENGTH_LONG).show()
             } else {
 
-                Glide.with(mContext)
-                    .load(adSpaceRespond.resourceUrl)
-                    .fitCenter()
-                    .into(imgAdspaceBanner)
+                val vidUri = Uri.parse(adSpaceRespond.resourceUrl)
+
+                val metrics = DisplayMetrics()
+                mActivity.windowManager.defaultDisplay.getMetrics(metrics)
+                val params = vidAdspaceBanner.layoutParams
+                params.width = metrics.widthPixels
+                params.height = 350
+                vidAdspaceBanner.layoutParams = params
+
+
+
+                imgAdspaceVideoPlay.setOnClickListener {
+                    progressBarBannerLoading.visibility =View.VISIBLE
+                    imgAdspaceVideoPlay.visibility =View.GONE
+                    vidAdspaceBanner.setVideoURI(vidUri)
+                    vidAdspaceBanner.start()
+
+                }
+
+
                 if(adSpaceRespond.actionData.imageClick){
-                    imgAdspaceBanner.setOnClickListener {
+                    vidAdspaceBanner.setOnClickListener {
                         val url = adSpaceRespond.actionData.imageClickUrl
                         val i = Intent(Intent.ACTION_VIEW)
                         i.data = Uri.parse(url)
@@ -119,15 +136,21 @@ class PopUp @JvmOverloads constructor(context: Context) : Dialog(context) {
 
 
                 imgAdspaceBannerClose.setOnClickListener {
-                    popUpAdd.dismiss()
+                    videoAdd.dismiss()
                 }
 
-                popUpAdd.show()
+                vidAdspaceBanner.setOnPreparedListener {
+                    progressBarBannerLoading.visibility =View.GONE
+                }
+
+                videoAdd.show()
             }
 
         }
 
 
     }
+
+
 
 }

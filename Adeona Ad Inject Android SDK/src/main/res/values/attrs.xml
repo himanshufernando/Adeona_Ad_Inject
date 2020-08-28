@@ -2,7 +2,9 @@
 <resources>
 
     <declare-styleable name="BannerView">
-        <attr name="image" format="reference"/>
-        <attr name="text" format="string"/>
+        <attr name="addtext" format="string"/>
+        <attr name="guide_progressTextColor" format="color"/>
     </declare-styleable>
+
+
 </resources>

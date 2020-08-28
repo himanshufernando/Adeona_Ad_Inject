@@ -3,7 +3,6 @@ package com.adeona.adeonaadinjectandroidsdk.repo
 import android.content.Context
 import com.adeona.adeonaadinjectandroidsdk.R
 import com.adeona.adeonaadinjectandroidsdk.data.model.AdSpace
-import com.adeona.adeonaadinjectandroidsdk.data.model.AdSpaceError
 import com.adeona.adeonaadinjectandroidsdk.data.model.AdSpaceRespond
 import com.adeona.adeonaadinjectandroidsdk.services.network.api.APIInterface
 import com.adeona.adeonaadinjectandroidsdk.services.network.internet.InternetConnection
@@ -15,39 +14,32 @@ class AdSpaceRepo(private var apiClient: APIInterface, context: Context) {
     var mContext = context
 
 
-    suspend fun getAdSpace(adSpace: AdSpace): AdSpaceRespond {
+    suspend fun getAdSpace(adSpace: AdSpace,type : String): AdSpaceRespond {
         var adSpaceRespond = AdSpaceRespond()
+        adSpaceRespond.status = "failed"
         when {
             !InternetConnection.checkInternetConnection(mContext) -> {
-                adSpaceRespond.adSpaceError = appPref.errorNoInternet(mContext)
+                adSpaceRespond.comment = mContext.getString(R.string.no_internet)
                 return adSpaceRespond
             }
             adSpace.appId.isNullOrEmpty() -> {
-                adSpaceRespond.adSpaceError = AdSpaceError(
-                    true,
-                    appPref.ERROR_EMPTY_APP_ID,
-                    mContext.getString(R.string.error_empty_appid)
-                )
+                adSpaceRespond.comment = mContext.getString(R.string.error_empty_appid)
                 return adSpaceRespond
             }
             adSpace.adSpaceId.isNullOrEmpty() -> {
-                adSpaceRespond.adSpaceError = AdSpaceError(
-                    true,
-                    appPref.ERROR_EMPTY_SPACE_ID,
-                    mContext.getString(R.string.error_empty_spaceid)
-                )
+                adSpaceRespond.comment = mContext.getString(R.string.error_empty_spaceid)
                 return adSpaceRespond
             }
             adSpace.adSpaceType.isNullOrEmpty() -> {
-                adSpaceRespond.adSpaceError = AdSpaceError(
-                    true,
-                    appPref.ERROR_EMPTY_SPACE_TYPE,
-                    mContext.getString(R.string.error_empty_spacetype)
-                )
+                adSpaceRespond.comment = mContext.getString(R.string.error_empty_spacetype)
                 return adSpaceRespond
             }
-            else -> {
+            type != adSpace.adSpaceType ->{
+                adSpaceRespond.comment = mContext.getString(R.string.error_incorrect_space_type)
+                return adSpaceRespond
+            }
 
+            else -> {
                 adSpace.os = mContext.getString(R.string.os)
                 adSpace.osVersion = appPref.getOSVersion()
                 adSpace.deviceBrand = appPref.getDeviceBrand()
@@ -76,7 +68,6 @@ class AdSpaceRepo(private var apiClient: APIInterface, context: Context) {
                 addSpaceJson.addProperty("category", adSpace.category)
                 addSpaceJson.addProperty("subCategory", adSpace.subCategory)
 
-                adSpaceRespond.adSpaceError.errorStatus = false
 
                 adSpaceRespond = apiClient.getAdSpace(addSpaceJson)
                 return adSpaceRespond
