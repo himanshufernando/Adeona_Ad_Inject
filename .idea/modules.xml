@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Adeona_Ad_Inject.iml" filepath="$PROJECT_DIR$/.idea/modules/Adeona_Ad_Inject.iml" group="Adeona_Ad_Inject" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Adeona Ad Inject Android SDK/Adeona_Ad_Inject_Android_SDK.iml" filepath="$PROJECT_DIR$/.idea/modules/Adeona Ad Inject Android SDK/Adeona_Ad_Inject_Android_SDK.iml" group="Adeona Ad Inject/Adeona Ad Inject Android SDK" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/app.iml" group="Adeona Ad Inject/app" />
+    </modules>
+  </component>
+</project>
